@@ -2,8 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const db = require('./db');
 const vehiclesRoutes = require('./routes/vehicles');
-
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -29,6 +27,12 @@ app.get('/test-db', async (req, res) => {
     if (conn) conn.release(); // release to pool
   }
 });
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+ 
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
