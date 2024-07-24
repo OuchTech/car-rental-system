@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Joi = require('joi');
 const db = require('../db');
 
 // GET all vehicles
@@ -16,26 +17,50 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET a single vehicle
-router.get('/:id', async (req, res) => {
+
+
+const vehicleSchema = Joi.object({
+    model: Joi.string().required(),
+    make: Joi.string().required(),
+    year: Joi.number().integer().min(1900).max(new Date().getFullYear() + 1).required(),
+    color: Joi.string(),
+    daily_rate: Joi.number().precision(2).positive().required()
+  });
+  
+  const validateVehicle = (req, res, next) => {
+    const { error } = vehicleSchema.validate(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+    next();
+  };
+  
+  router.get('/', async (req, res) => {
     let conn;
     try {
-        conn = await db.getConnection();
-        const rows = await conn.query('SELECT * FROM vehicles WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) {
-            res.status(404).json({ message: "Vehicle not found" });
-        } else {
-            res.json(rows[0]);
-        }
+      conn = await db.getConnection();
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+      const [rows, fields] = await conn.query('SELECT * FROM vehicles LIMIT ? OFFSET ?', [limit, offset]);
+      const [countResult] = await conn.query('SELECT COUNT(*) as count FROM vehicles');
+      const totalCount = countResult[0].count;
+      res.json({
+        data: rows,
+        page,
+        limit,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit)
+      });
     } catch (err) {
-        res.status(500).json({ error: err.message });
+      res.status(500).json({ error: err.message });
     } finally {
-        if (conn) conn.release();
+      if (conn) conn.release();
     }
-});
+  });
 
 // POST a new vehicle
-router.post('/', async (req, res) => {
+router.post('/', validateVehicle, async (req, res) => {
     let conn;
     try {
         conn = await db.getConnection();
@@ -52,7 +77,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update a vehicle
-router.put('/:id', async (req, res) => {
+router.put('/:id', validateVehicle, async (req, res) => {
     let conn;
     try {
         conn = await db.getConnection();
