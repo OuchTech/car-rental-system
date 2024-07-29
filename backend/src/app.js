@@ -1,8 +1,13 @@
 const express = require('express');
+const cors = require('cors'); // Import CORS
+
 const app = express();
 const pool = require('./db'); // Import database connection
-const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
+
+// Middleware to parse JSON bodies
+app.use(express.json());
+app.use(cors()); // Use CORS middleware
 
 // Import routes
 const carRoutes = require('./routes/cars');
