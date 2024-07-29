@@ -1,9 +1,24 @@
 const express = require('express');
 const app = express();
+const pool = require('./db'); // Import database connection
+const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
+// Import routes
+const carRoutes = require('./routes/cars');
+
+// Use routes
+app.use('/api/cars', carRoutes);
+
+app.get('/', async (req, res) => {
+  try {
+    const conn = await pool.getConnection();
+    const rows = await conn.query("SELECT 1 as val");
+    conn.release();
+    res.send(rows);
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 });
 
 app.listen(PORT, () => {
