@@ -1,27 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const CarForm = () => {
+const CarForm = ({ editingCar, setEditingCar }) => {
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
   const [year, setYear] = useState('');
+  const [id, setId] = useState(null);
+
+  useEffect(() => {
+    if (editingCar) {
+      setMake(editingCar.make);
+      setModel(editingCar.model);
+      setYear(editingCar.year);
+      setId(editingCar.id);
+    }
+  }, [editingCar]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/api/cars', { make, model, year });
-      alert('Car added successfully');
+      if (id) {
+        await axios.put(`http://localhost:3001/api/cars/${id}`, { make, model, year });
+        alert('Car updated successfully');
+      } else {
+        await axios.post('http://localhost:3001/api/cars', { make, model, year });
+        alert('Car added successfully');
+      }
       setMake('');
       setModel('');
       setYear('');
+      setId(null);
+      setEditingCar(null);
     } catch (error) {
-      console.error('Error adding car:', error);
+      console.error('Error adding/updating car:', error);
     }
   };
 
   return (
     <div>
-      <h2>Car Form</h2>
+      <h2>{id ? 'Edit Car' : 'Add Car'}</h2>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Make:</label>
@@ -35,7 +52,7 @@ const CarForm = () => {
           <label>Year:</label>
           <input type="number" value={year} onChange={(e) => setYear(e.target.value)} required />
         </div>
-        <button type="submit">Add Car</button>
+        <button type="submit">{id ? 'Update Car' : 'Add Car'}</button>
       </form>
     </div>
   );

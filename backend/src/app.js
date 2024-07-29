@@ -1,19 +1,20 @@
+require('dotenv').config();
 const express = require('express');
-const cors = require('cors'); // Import CORS
+const cors = require('cors');
 
 const app = express();
 const pool = require('./db'); // Import database connection
-const PORT = process.env.PORT || 3000;
+const carRoutes = require('./routes/cars');
+const userRoutes = require('./routes/user');
+const PORT = process.env.PORT || 3001;
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(cors()); // Use CORS middleware
 
-// Import routes
-const carRoutes = require('./routes/cars');
-
 // Use routes
 app.use('/api/cars', carRoutes);
+app.use('/api/user', userRoutes);
 
 app.get('/', async (req, res) => {
   try {
