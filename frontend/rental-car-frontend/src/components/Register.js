@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const Login = ({ setToken }) => {
+const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -9,19 +9,20 @@ const Login = ({ setToken }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/api/user/login', { username, password });
-      setToken(response.data.token);
+      await axios.post('http://localhost:3001/api/user/register', { username, password });
       setError('');
-      alert('Login successful');
+      alert('Registration successful');
+      setUsername('');
+      setPassword('');
     } catch (error) {
-      console.error('Error logging in:', error);
-      setError('Invalid credentials');
+      console.error('Error registering:', error);
+      setError('Registration failed. Username might already be taken.');
     }
   };
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Register</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
         <div>
@@ -32,10 +33,10 @@ const Login = ({ setToken }) => {
           <label>Password:</label>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit">Register</button>
       </form>
     </div>
   );
 };
 
-export default Login;
+export default Register;
