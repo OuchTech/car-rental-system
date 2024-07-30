@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from 'react';
+
 import axios from 'axios';
 import CarForm from './CarForm';
 
-const CarList = () => {
+const CarList = ({ token }) => {
   const [cars, setCars] = useState([]);
   const [editingCar, setEditingCar] = useState(null);
 
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/cars');
+        const response = await axios.get('http://localhost:3001/api/cars', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         setCars(response.data);
       } catch (error) {
         console.error('Error fetching cars:', error);
@@ -17,7 +22,7 @@ const CarList = () => {
     };
 
     fetchCars();
-  }, []);
+  }, [token]);
 
   const handleEditClick = (car) => {
     setEditingCar(car);
@@ -25,7 +30,11 @@ const CarList = () => {
 
   const handleDeleteClick = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/api/cars/${id}`);
+      await axios.delete(`http://localhost:3001/api/cars/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       setCars(cars.filter(car => car.id !== id));
       alert('Car deleted successfully');
     } catch (error) {
@@ -45,7 +54,7 @@ const CarList = () => {
           </li>
         ))}
       </ul>
-      <CarForm editingCar={editingCar} setEditingCar={setEditingCar} />
+      <CarForm token={token} editingCar={editingCar} setEditingCar={setEditingCar} />
     </div>
   );
 };

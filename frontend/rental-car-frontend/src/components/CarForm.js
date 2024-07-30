@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const CarForm = ({ editingCar, setEditingCar }) => {
+const CarForm = ({ token, editingCar, setEditingCar }) => {
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
   const [year, setYear] = useState('');
@@ -20,10 +20,18 @@ const CarForm = ({ editingCar, setEditingCar }) => {
     e.preventDefault();
     try {
       if (id) {
-        await axios.put(`http://localhost:3001/api/cars/${id}`, { make, model, year });
+        await axios.put(`http://localhost:3001/api/cars/${id}`, { make, model, year }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         alert('Car updated successfully');
       } else {
-        await axios.post('http://localhost:3001/api/cars', { make, model, year });
+        await axios.post('http://localhost:3001/api/cars', { make, model, year }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         alert('Car added successfully');
       }
       setMake('');
