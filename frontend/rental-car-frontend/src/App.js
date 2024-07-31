@@ -3,14 +3,17 @@ import CarList from './components/CarList';
 import CarForm from './components/CarForm';
 import Login from './components/Login';
 import Register from './components/Register';
+import Profile from './components/Profile';
 
 function App() {
   const [token, setToken] = useState('');
   const [showLogin, setShowLogin] = useState(true);
+  const [showProfile, setShowProfile] = useState(false);
 
   const handleLogout = () => {
     setToken('');
     setShowLogin(true);
+    setShowProfile(false);
   };
 
   if (!token) {
@@ -41,8 +44,17 @@ function App() {
     <div className="App">
       <h1>Rental Car System</h1>
       <button onClick={handleLogout}>Logout</button>
-      <CarList token={token} />
-      <CarForm token={token} />
+      <button onClick={() => setShowProfile(!showProfile)}>
+        {showProfile ? 'Hide Profile' : 'Show Profile'}
+      </button>
+      {showProfile ? (
+        <Profile token={token} />
+      ) : (
+        <>
+          <CarList token={token} />
+          <CarForm token={token} />
+        </>
+      )}
     </div>
   );
 }
